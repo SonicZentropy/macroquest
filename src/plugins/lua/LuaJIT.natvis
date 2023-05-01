@@ -338,6 +338,32 @@
 		</Expand>
 	</Type>
 
+	<!-- sol::function_result -->
+	<Type Name="sol::protected_function_result">
+		<Intrinsic Name="nilnode" Expression="(TValue*)&amp;((global_State*)L->glref.ptr32)->nilnode.val" />
+
+		<!-- index2adr -->
+		<Intrinsic Name="isStackBase" Expression="index > 0" />
+		<Intrinsic Name="stackValueBase" Expression="
+				   ((L->base + (index - 1)) &lt; L->top)
+				   ? (L->base + (index - 1)) : nilnode()" />
+		<Intrinsic Name="isStackTop" Expression="index > -10000" />
+		<Intrinsic Name="stackValueTop" Expression="L->top + index" />
+
+		<Intrinsic Name="value" Expression="
+				   *(TValue*)(isStackBase() ? stackValueBase() : isStackTop() ? stackValueTop() : nilnode())
+				   " />
+
+		<Intrinsic Name="hasValue" Expression="isStackBase() || isStackTop()" />
+
+		<DisplayString Condition="hasValue()">{value()}</DisplayString>
+		<Expand>
+			<Item Name="[value]">value()</Item>
+			<Item Name="err">err</Item>
+			<Item Name="index">index</Item>
+		</Expand>
+	</Type>
+
 	<!-- sol::this_state -->
 	<Type Name="sol::this_state">
 		<DisplayString Condition="L == 0">nil</DisplayString>
