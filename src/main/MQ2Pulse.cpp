@@ -90,7 +90,7 @@ static bool DoNextCommand(MQMacroBlockPtr pBlock)
 		char szCond[MAX_STRING];
 		strcpy_s(szCond, gDelayCondition);
 
-		ParseMacroParameter(pLocalPlayer, szCond);
+		ParseMacroData(szCond, MAX_STRING);
 
 		double Result;
 		if (!Calculate(szCond, Result))

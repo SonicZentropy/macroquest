@@ -57,6 +57,8 @@ using namespace eqlib;
 #include "MQ2DataContainers.h"
 #include "MQ2Utilities.h"
 #include "PipeClient.h"
+
+#include "MQDataAPI.h"
 #include "datatypes/MQ2DataTypes.h"
 
 // Link up ImGui
@@ -73,6 +75,10 @@ using namespace eqlib;
 #include "mq/base/Detours.h"
 #include "mq/utils/Benchmarks.h"
 #include "mq/utils/Keybinds.h"
+
+#include "mq/api/Main.h"
+#include "mq/api/MacroAPI.h"
+#include "mq/api/Plugin.h"
 
 namespace mq {
 
@@ -176,14 +182,6 @@ void ModulesUpdateImGui();
 void PluginsMacroStart(const char* Name);
 void PluginsMacroStop(const char* Name);
 
-MQLIB_API bool IsPluginsInitialized();
-MQLIB_API void* GetPluginProc(const char* plugin, const char* proc);
-MQLIB_API MQPlugin* GetPlugin(std::string_view PluginName);
-MQLIB_API bool IsPluginLoaded(std::string_view PluginName);
-MQLIB_API bool IsPluginUnloadFailed(std::string_view PluginName);
-MQLIB_API int GetPluginUnloadFailedCount();
-MQLIB_API PluginInterface* GetPluginInterface(std::string_view PluginName);
-
 
 /* DIRECT INPUT */
 MQLIB_API void InitializeMQ2DInput();
@@ -216,31 +214,6 @@ MQLIB_API void EndMacro(SPAWNINFO*, char*);
 MQLIB_API void Echo(SPAWNINFO*, char*);
 MQLIB_API void EchoClean(SPAWNINFO*, char*);
 
-/* MACRO PARSING */
-void CALLBACK EventBlechCallback(unsigned int ID, void* pData, PBLECHVALUE pValues);
-MQLIB_API char* ParseMacroParameter(SPAWNINFO* pChar, char* szOriginal, size_t BufferSize);
-MQLIB_API bool ParseMacroData(char* szOriginal, size_t BufferSize);
-MQLIB_API bool ParseMQ2DataPortion(char* szOriginal, MQTypeVar& Result);
-
-// Returns -1 if member doesn't exist. 0 if it fails, and 1 if it succeeds.
-MQLIB_API int EvaluateMacroDataMember(MQ2Type* Type, MQVarPtr VarPtr, MQTypeVar& Result, const char* Member, char* pIndex);
-// Returns false if the given name is neither a member nor a method of the given type.
-MQLIB_OBJECT bool FindMacroDataMember(MQ2Type* Type, const std::string& Member);
-
-template <unsigned int _Size>
-inline char* ParseMacroParameter(SPAWNINFO* pChar, char(&szOriginal)[_Size])
-{
-	return ParseMacroParameter(pChar, szOriginal, _Size);
-}
-
-std::string HandleParseParam(std::string_view strOriginal, bool bParseOnce = false);
-
-enum class ModifyMacroMode { Default, Wrap, WrapNoDoubles };
-
-std::string ModifyMacroString(std::string_view strOriginal, bool bParseOnce = false,
-	ModifyMacroMode iOperation = ModifyMacroMode::Default);
-
-MQLIB_API void FailIf(SPAWNINFO* pChar, const char* szCommand, int pStartLine, bool All = false);
 
 /* MOUSE */
 MQLIB_API bool IsMouseWaiting();
@@ -831,7 +804,6 @@ MQLIB_API int GetSubscriptionLevel();
 } // namespace mq
 
 #include "mq/api/Achievements.h"
-#include "mq/api/MacroAPI.h"
 #include "mq/api/Spells.h"
 
 #if __has_include("../private/MQ2Main-private.h")
